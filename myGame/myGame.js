@@ -13,7 +13,7 @@ game_state.main.prototype = {
         game.load.image('sky', 'assets/sky.png');
         game.load.image('ground', 'assets/platform.png');
         game.load.image('star', 'assets/star.png');
-        game.load.spritesheet('dude', 'assets/itChar', 32, 48);
+        game.load.spritesheet('dude', 'assets/itChar.png', 144, 144);
     },
 
 
@@ -46,22 +46,25 @@ game_state.main.prototype = {
         ledge.body.immovable = true;
 
         // The this.player and its settings
-        this.player = game.add.sprite(32, game.world.height - 150, 'dude');
+        this.player = game.add.sprite(32, game.world.height - 200, 'dude');
 
         // We need to enable physics on the this.player
         game.physics.arcade.enable(this.player);
 
         // Player physics properties. Give the little guy a slight bounce.
         this.player.body.bounce.y = 0.5;
-        this.player.gravity.y = 1;
+        this.player.body.gravity.y = 300;
         this.player.body.collideWorldBounds = true;
+        this.player.scale.setTo(0.75, 0.75);
+        this.player.body.setSize(25, 114, 43, 10 );
 
-        // Our two animations, walking left and right.
-        this.player.animations.add('left', [0, 1, 2, 3], 10, true);
-        this.player.animations.add('right', [5, 6, 7, 8], 10, true);
+        // Our three animations, walking left and right, and stop.
+        this.player.animations.add('left', [4, 5, 6], 10, true);
+        this.player.animations.add('right', [1, 2, 3], 10, true);
+        this.player.animations.add('Stop', [0], 10, true);
 
         //Our controls
-        this.cursors = game.input.keyboard.createCutsorKeys();
+        this.cursors = game.input.keyboard.createCursorKeys();
         
          // Finally some this.stars to collect
         this.stars = game.add.group();
@@ -70,7 +73,7 @@ game_state.main.prototype = {
         this.stars.enableBody = true;
         
         // Here we'll create 12 of them evenky spaced apart
-        for (var i = 0; 1 < 12; i++) {
+        for (var i = 0; i < 12; i++) {
             //Create a star inside of the 'this.stars' group
             var star = this.stars.create(i * 70, 0, 'star');
             
@@ -107,15 +110,15 @@ game_state.main.prototype = {
         }
         else if (this.cursors.right.isDown) {
             // Move to the right
-            this.player.body.velocity.x = -150;
+            this.player.body.velocity.x = 150;
 
             this.player.animations.play('right');
         }
         else {
             // Stand still
-            this.player.body.velocity.x = 150;
+            this.player.body.velocity.x = 0;
 
-            this.player.animations.play('right');
+            this.player.animations.play('stop');
         }
 
         // Allow the this.player to jump if they are touching the ground.
@@ -129,6 +132,7 @@ game_state.main.prototype = {
         
         // Checks to see if the  this.player overlaps with any of the this.stars, if he does call the collectStar fuction
         game.physics.arcade.overlap(this.player, this.stars, this.collectStar, null, this);
+        game.debug.body(this.player);
     },
     
     collectStar: function(player, star) {
